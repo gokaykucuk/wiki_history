@@ -1,0 +1,2 @@
+export DATA_CSV_PATH=data.csv
+export DATA_XML_PATH=data.xml
