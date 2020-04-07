@@ -1,29 +1,38 @@
+import time
+import dask
 import pandas as pd
 
-from bokeh.models import ColumnDataSource
-from bokeh.plotting import figure, output_notebook, show
-output_notebook()
+
+import dask.dataframe as dd
+
+# import modin.pandas as pd
+from dask.distributed import Client
+
+client = Client(n_workers=6, threads_per_worker=2, processes=False, memory_limit='20GB')
+client
+
+print("Parsing parquet.")
+input_data = dd.read_parquet('data/input.parquet', engine='pyarrow')
+print("Adding day columns.")
+input_data['timestamp'] = dd.to_datetime(input_data.timestamp,format='%Y/%m/%d %H:%M')
+input_data['day'] = input_data.timestamp.dt.date
+
+print(input_data['day'].head())
+# input_data['timestamp'] = pd.to_datetime(input_data['timestamp'])
+# input_data['day'] = input_data.timestamp.dt.date
+
+# input_data = input_data[input_data.page_title != 'Tartışma:Anasayfa']
+
+# # day_title_grouped = input_data.groupby(['day','page_title']).count()
+
+# day_title_grouped = input_data.groupby(['day','page_title'])['page_title'].apply(len)
 
 
+print(input_data.head())
+
+input_data.to_parquet('data/with_day.parquet', engine='pyarrow')
 
 
-
-csv_data = pd.read_csv('data.csv', quotechar ='|', index_col = False)
-
-csv_data['timestamp'] = pd.to_datetime(csv_data['timestamp'])
-csv_data['day'] = csv_data.timestamp.dt.date
-
-csv_data = csv_data[csv_data.page_title != 'Tartışma:Anasayfa']
-
-# day_title_grouped = csv_data.groupby(['day','page_title']).count()
-
-day_title_grouped = csv_data.groupby(['day','page_title'])['page_title'].apply(len)
-
-
-
-print(day_title_grouped)
-
-day_title_grouped.to_csv('export.csv')
 
 # output to static HTML file
 # output_file("log_lines.html")

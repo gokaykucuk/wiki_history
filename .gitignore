@@ -3,3 +3,4 @@
 .ipynb_checkpoints
 data*
 log_lines*
+dask-worker-space
